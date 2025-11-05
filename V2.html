@@ -1,0 +1,2593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>备件管理系统</title>
+<script src="./js/xlsx.full.min.js"></script>
+<script src="./js/chart.min.js"></script>
+<script src="./js/chartjs-plugin-datalabels.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4CAF50;
+      --primary-dark: #3d8b40;
+      --primary-light: #e8f5e9;
+      --secondary-color: #f1c40f;
+      --secondary-dark: #e67e22;
+      --text-color: #333;
+      --text-light: #666;
+      --border-color: #ddd;
+      --bg-color: #f5f5f5;
+      --card-bg: #fff;
+      --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+      --form-group-gap: 1rem;
+      --input-height: 40px;
+      --row-margin: 1rem;
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 1.8rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: center;
+      background-color: #333;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar a {
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      text-align: center;
+      font-size: 16px;
+      transition: var(--transition);
+      position: relative;
+      font-weight: 500;
+    }
+
+    .navbar a:hover {
+      background-color: #444;
+      color: var(--secondary-color);
+    }
+
+    .navbar a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background-color: var(--secondary-color);
+      transition: var(--transition);
+    }
+
+    .navbar a:hover::after {
+      width: 100%;
+    }
+
+    .container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-title {
+      margin-bottom: 1.5rem;
+      color: var(--primary-dark);
+      font-weight: 600;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary-light);
+      font-size: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--form-group-gap);
+      align-items: flex-start;
+      margin-bottom: var(--row-margin);
+    }
+
+    .form-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-row-1 .form-item,
+    .form-row-2 .form-item {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .form-row-3 .form-item {
+      min-width: 180px;
+    }
+    
+    .form-row-3 .form-item:first-child,
+    .form-row-3 .form-item:nth-child(2) {
+      flex: 1;
+    }
+    
+    .form-row-3 .form-item:last-child {
+      flex: 2;
+    }
+
+    .form-item label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-color);
+      line-height: 1.2;
+      font-size: 14px;
+    }
+
+    .form-item input, 
+    .form-item select,
+    .form-item textarea {
+      width: 100%;
+      height: var(--input-height);
+      padding: 0 12px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      transition: var(--transition);
+      resize: vertical;
+      font-family: var(--font-main);
+      line-height: normal;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .form-item textarea {
+      min-height: var(--input-height);
+      overflow-y: auto;
+    }
+
+    .form-item input:focus, 
+    .form-item select:focus, 
+    .form-item textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 15px;
+      border-radius: 6px;
+      transition: var(--transition);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-main);
+    }
+
+    .btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-add {
+      padding: 10px 24px;
+      margin-right: 10px;
+      background-color: var(--primary-color);
+    }
+
+    .btn-import {
+      background-color: #2196F3;
+      margin-right: 10px;
+    }
+
+    .btn-import:hover {
+      background-color: #0b7dda;
+    }
+
+    .btn-export {
+      background-color: #ff9800;
+      margin-right: 10px;
+    }
+
+    .btn-export:hover {
+      background-color: #e68900;
+    }
+
+    .btn-filter {
+      background-color: #9c27b0;
+    }
+
+    .btn-filter:hover {
+      background-color: #7b1fa2;
+    }
+
+    .btn-reset {
+      background-color: #f44336;
+    }
+
+    .btn-reset:hover {
+      background-color: #d32f2f;
+    }
+
+    .action-buttons {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+    }
+
+    .search-input {
+      height: var(--input-height);
+      padding: 0 15px;
+      border-radius: 6px 0 0 6px;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      width: 100%;
+      font-family: var(--font-main);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .search-btn {
+      height: var(--input-height);
+      padding: 0 18px;
+      border-radius: 0 6px 6px 0;
+      border: none;
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .search-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .filter-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      background-color: var(--card-bg);
+      padding: 1.2rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+      border: 1px solid #f0f0f0;
+    }
+
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      min-width: 180px;
+      flex: 1;
+    }
+
+    .filter-item label {
+      margin-bottom: 0.3rem;
+      font-size: 14px;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .filter-actions {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      padding-bottom: 5px;
+    }
+
+    .table-container {
+      margin-top: 1.5rem;
+      overflow-x: auto;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th, table td {
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 14px;
+      white-space: nowrap; /* 防止内容换行 */
+    }
+
+    /* 表格列宽最小值设置 */
+    #partsTable th, #partsTable td {
+      min-width: 80px;
+    }
+    
+    /* 物料编码列 */
+    #partsTable th:nth-child(1), #partsTable td:nth-child(1) {
+      min-width: 100px;
+    }
+    
+    /* 物料名称列 */
+    #partsTable th:nth-child(2), #partsTable td:nth-child(2) {
+      min-width: 150px;
+    }
+    
+    /* 备注列 */
+    #partsTable th:nth-child(12), #partsTable td:nth-child(12) {
+      min-width: 180px;
+    }
+    
+    /* 操作列 */
+    #partsTable th:last-child, #partsTable td:last-child {
+      min-width: 180px;
+    }
+
+    /* 出入库记录表操作列 */
+    #transactionTable th:last-child, #transactionTable td:last-child {
+      min-width: 80px;
+    }
+
+    table th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+    }
+
+    table tr:hover {
+      background-color: var(--primary-light);
+      transition: var(--transition);
+    }
+
+    table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    table td button {
+      padding: 6px 12px;
+      margin: 0 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 4px;
+      transition: var(--transition);
+      font-family: var(--font-main);
+    }
+
+    table td .btn-edit {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    table td .btn-edit:hover {
+      background-color: #d4ac0d;
+    }
+
+    table td .btn-delete {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    table td .btn-delete:hover {
+      background-color: #c0392b;
+    }
+
+    table td .btn-export {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    table td .btn-export:hover {
+      background-color: #0b7dda;
+    }
+
+    .chart-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .chart-wrapper {
+      flex: 1;
+      min-width: 300px;
+      max-width: 800px;
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .stats-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .chart-stats {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background-color: var(--primary-light);
+      border-radius: 8px;
+      padding: 1.2rem;
+      min-width: 180px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      margin: 0.5rem 0;
+    }
+
+    .stat-label {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .analysis-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+    }
+
+    .analysis-table th,
+    .analysis-table td {
+      padding: 12px 15px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .analysis-table th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 600;
+    }
+
+    .analysis-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .analysis-table tr:hover {
+      background-color: var(--primary-light);
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 400px !important;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding-top: 60px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal.show {
+      opacity: 1;
+    }
+
+    .modal-content {
+      background-color: var(--card-bg);
+      margin: 3% auto;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 1000px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal.show .modal-content {
+      transform: translateY(0);
+    }
+
+    .close {
+      color: var(--text-light);
+      position: absolute;
+      right: 1.5rem;
+      top: 1rem;
+      font-size: 1.8rem;
+      font-weight: bold;
+      transition: var(--transition);
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+      transform: rotate(90deg);
+    }
+
+    .error-message {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 5px;
+      min-height: 1.2em;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .modal-footer .btn {
+      padding: 12px 24px;
+      font-size: 16px;
+    }
+
+    .home-intro {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      margin-top: 1rem;
+      line-height: 1.8;
+    }
+
+    .home-intro p {
+      margin-top: 1rem;
+      color: var(--text-light);
+      font-size: 15px;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .import-export-info {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    .filter-summary {
+      font-size: 14px;
+      color: var(--text-color);
+      margin: 0.5rem 0;
+      padding: 0.7rem 1rem;
+      background-color: var(--primary-light);
+      border-radius: 4px;
+      display: none;
+      border-left: 3px solid var(--primary-color);
+    }
+
+    .filter-summary.show {
+      display: block;
+    }
+
+    .highlight {
+      background-color: #fff3cd;
+      font-weight: bold;
+    }
+
+    .dashboard-filter {
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .dashboard-filter label {
+      font-weight: 500;
+    }
+
+    .dashboard-filter select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+    }
+
+    .chart-section {
+      margin-top: 3rem;
+    }
+
+    .chart-section-title {
+      font-size: 1.2rem;
+      color: var(--primary-dark);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--primary-light);
+    }
+/* 新增：图表与表格同行布局 */
+.combined-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.chart-half {
+  flex: 1;
+  min-width: 300px;
+  max-width: 50%;
+}
+
+.table-half {
+  flex: 1;
+  min-width: 300px;
+  max-width: 50%;
+}
+
+    @media (max-width: 768px) {
+      .navbar a {
+        padding: 12px 15px;
+        font-size: 14px;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      .form-group {
+        gap: 0.8rem;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .search-container {
+        margin-left: 0;
+        width: 100%;
+        max-width: none;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+
+      .filter-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .modal-content {
+        margin: 10% auto;
+        padding: 1.5rem;
+      }
+
+      table th, table td {
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+
+      .form-row-3 .form-item:last-child {
+        flex: 1;
+      }
+
+      .dashboard-filter {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  备件管理系统
+</header>
+
+<div class="navbar">
+  <a href="javascript:void(0);" onclick="showPage('home')">首页</a>
+  <a href="javascript:void(0);" onclick="showPage('partManagement')">备件管理</a>
+  <a href="javascript:void(0);" onclick="showPage('dataAnalysis')">251库存看板</a>
+</div>
+
+<!-- 主页面 -->
+<div class="container" id="home" style="display: block;">
+  <h2 class="page-title">欢迎使用备件管理系统</h2>
+  <div class="home-intro">
+    <p>在这里，您可以管理备件的库存信息，并查看实时的库存分析图表。系统提供完整的备件入库、出库、编辑、删除、搜索和筛选功能，帮助您高效管理库存资产。</p>
+    <p>通过数据分析模块，您可以直观了解库存分布情况和出库趋势，为采购决策提供数据支持。</p>
+  </div>
+  
+  <!-- 出入库记录 -->
+  <h2 class="page-title" style="margin-top: 2rem;">最近出入库记录</h2>
+  
+  <!-- 新增：出入库记录操作按钮 -->
+  <div class="action-buttons">
+    <button class="btn btn-export" onclick="exportTransactionsToExcel()">
+      <i class="fas fa-file-export"></i> 导出出入库记录
+    </button>
+    <button class="btn btn-reset" onclick="clearAllTransactions()">
+      <i class="fas fa-trash"></i> 清空所有记录
+    </button>
+  </div>
+  
+  <div class="table-container">
+    <table id="transactionTable">
+      <thead>
+        <tr>
+          <th>物料编码</th>
+          <th>物料名称</th>
+          <th>操作类型</th>
+          <th>数量</th>
+          <th>操作人</th>
+          <th>操作时间</th>
+          <th>备注</th>
+          <th>操作</th> <!-- 新增：操作列 -->
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 动态填充 -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 备件管理页面 -->
+<div class="container" id="partManagement" style="display: none;">
+  <h2 class="page-title">备件管理</h2>
+
+  <!-- 操作按钮区域 -->
+  <div class="action-buttons">
+    <button class="btn btn-add" onclick="openModal()">
+      <i class="fas fa-plus"></i> 添加备件
+    </button>
+    <button class="btn btn-import" onclick="document.getElementById('fileInput').click()">
+      <i class="fas fa-file-import"></i> 导入Excel
+    </button>
+    <button class="btn btn-export" onclick="exportToExcel()">
+      <i class="fas fa-file-export"></i> 导出Excel
+    </button>
+    <input type="file" id="fileInput" accept=".xlsx, .xls" onchange="importFromExcel(event)">
+    
+    <!-- 全局搜索功能 -->
+    <div class="search-container">
+      <input type="text" class="search-input" id="searchInput" placeholder="全局搜索：物料编码、名称、批次、备注等所有字段...">
+      <button class="search-btn" onclick="globalSearch()">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+  </div>
+  <div class="import-export-info">
+    提示：导入Excel需包含表头：物料编码、物料名称、批次、现存量、单位、单价、入库日期、入库人、入库类型、备注
+  </div>
+
+  <!-- 筛选条件区域 -->
+  <div class="filter-container">
+    <div class="filter-item">
+      <label for="filterType">入库类型</label>
+      <select id="filterType">
+        <option value="">全部类型</option>
+        <option value="采购入库">采购入库</option>
+        <option value="修旧入库">修旧入库</option>
+        <option value="项目入库">项目入库</option>
+        <option value="工具杂品">工具杂品</option>
+      </select>
+    </div>
+    
+    <!-- 库存帐龄筛选 -->
+    <div class="filter-item">
+      <label for="filterAge">库存帐龄</label>
+      <select id="filterAge">
+        <option value="">全部</option>
+        <option value="twoMonths">两月以内</option>
+        <option value="fiveMonths">五月以内</option>
+        <option value="oneYear">一年以内</option>
+        <option value="overOneYear">一年以上</option>
+      </select>
+    </div>
+    
+    <div class="filter-item">
+      <label for="filterDateFrom">入库日期从</label>
+      <input type="date" id="filterDateFrom">
+    </div>
+    <div class="filter-item">
+      <label for="filterDateTo">到</label>
+      <input type="date" id="filterDateTo">
+    </div>
+    <div class="filter-actions">
+      <button class="btn btn-filter" onclick="applyFilters()">
+        <i class="fas fa-filter"></i> 筛选
+      </button>
+      <button class="btn btn-reset" onclick="resetFilters()">
+        <i class="fas fa-sync-alt"></i> 重置
+      </button>
+    </div>
+  </div>
+
+  <!-- 筛选结果摘要 -->
+  <div class="filter-summary" id="filterSummary"></div>
+
+  <!-- 备件列表 -->
+  <div class="table-container">
+    <table id="partsTable">
+      <thead>
+        <tr>
+          <th>物料编码</th>
+          <th>物料名称</th>
+          <th>批次</th>
+          <th>现存量</th>
+          <th>单位</th>
+          <th>单价</th>
+          <th>金额</th>
+          <th>入库日期</th>
+          <th>库存帐龄</th>
+          <th>入库人</th>
+          <th>入库类型</th>
+          <th>备注</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 动态填充 -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 251库存看板页面 -->
+<div class="container" id="dataAnalysis" style="display: none;">
+  <h2 class="page-title">251库存看板</h2>
+  
+  <!-- 入库类型筛选器 -->
+  <div class="dashboard-filter">
+    <label for="dashboardTypeFilter">入库类型：</label>
+    <select id="dashboardTypeFilter" onchange="updateDashboard()">
+      <option value="">全部类型</option>
+      <option value="采购入库">采购入库</option>
+      <option value="修旧入库">修旧入库</option>
+      <option value="项目入库">项目入库</option>
+      <option value="工具杂品">工具杂品</option>
+    </select>
+    
+    <label for="outboundPeriodFilter" style="margin-left: 15px;">出库统计周期：</label>
+    <select id="outboundPeriodFilter" onchange="updateDashboard()">
+      <option value="month">按月</option>
+      <option value="week">按周</option>
+      <option value="day">按日</option>
+    </select>
+  </div>
+  
+  <div class="chart-stats">
+    <div class="stat-card">
+      <div class="stat-label">库存总金额</div>
+      <div class="stat-value" id="totalAmount">0.00 万元</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">备件总数</div>
+      <div class="stat-value" id="totalItems">0 项</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">本月出库总量</div>
+      <div class="stat-value" id="monthlyOutbound">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">出库总金额</div>
+      <div class="stat-value" id="totalOutboundAmount">0.00 万元</div>
+    </div>
+  </div>
+  
+<div class="combined-row">
+
+  <div class="chart-half">
+
+      <div class="chart-wrapper">
+        <h3 style="text-align: center; margin-bottom: 1rem;">库存账龄金额分布</h3>
+        <canvas id="agePieChart"></canvas>
+      </div>
+
+    </div>
+    
+    <!-- 库存分析统计表格 -->
+  <div class="table-half">
+    <div class="table-container">
+      <h3 style="text-align: center; margin: 1rem 0;">库存账龄分析统计</h3>
+      <table class="analysis-table" id="ageAnalysisTable">
+        <thead>
+          <tr>
+            <th>账龄分类
+            </th>
+            <th>备件数量</th>
+            <th>总金额(万元)</th>
+            <th>占比(%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 动态填充 -->
+        </tbody>
+      </table>
+    </div>
+   </div>
+
+  </div>
+
+    <!-- 出库分析部分 -->
+    <div class="chart-section">
+      <h3 class="chart-section-title">出库记录分析</h3>
+     </div>
+
+      <div class="chart-container">
+
+        <div class="chart-wrapper">
+          <h3 style="text-align: center; margin-bottom: 1rem;">出库备件类型占比</h3>
+          <canvas id="outboundTypeChart"></canvas>
+        </div>
+     
+        <div class="chart-wrapper">
+          <h3 style="text-align: center; margin-bottom: 1rem;">出库量TOP5备件</h3>
+          <canvas id="topOutboundChart"></canvas>
+        </div>
+
+      </div>
+
+
+  <div class="chart-container">
+    <div class="chart-wrapper">
+          <h3 style="text-align: center; margin-bottom: 1rem;">出库趋势</h3>
+          <canvas id="outboundTrendChart"></canvas>
+    </div>
+
+  </div>
+    <!-- 出库出库分析统计表格 -->
+    <div class="table-container" style="margin-top: 2rem;">
+      <h3 style="text-align: center; margin: 1rem 0;">出库分析统计</h3>
+      <table class="analysis-table" id="outboundAnalysisTable">
+        <thead>
+          <tr>
+            <th>物料编码</th>
+            <th>物料名称</th>
+            <th>出库总量</th>
+            <th>出库总金额(元)</th>
+            <th>出库次数</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 动态填充 -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 模态框 - 添加备件 -->
+<div id="partModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h2 class="page-title">添加/编辑备件</h2>
+
+    <!-- 第一行：物料编码，物料名称，批次，现存量 -->
+    <div class="form-group form-row-1">
+      <div class="form-item">
+        <label for="partCode">物料编码<span class="error-message" id="partCodeError">*</span>:</label>
+        <input type="text" id="partCode" placeholder="请输入物料编码" required>
+      </div>
+      <div class="form-item">
+        <label for="partName">物料名称<span class="error-message" id="partNameError">*</span>:</label>
+        <input type="text" id="partName" placeholder="请输入物料名称" required>
+      </div>
+      <div class="form-item">
+        <label for="batchNo">批次:</label>
+        <input type="text" id="batchNo" placeholder="请输入批次">
+      </div>
+      <div class="form-item">
+        <label for="quantity">现存量:</label>
+        <input type="number" id="quantity" placeholder="请输入现存量" oninput="calculateAmount()">
+      </div>
+    </div>
+
+    <!-- 第二行：单位，单价，金额，入库日期 -->
+    <div class="form-group form-row-2">
+      <div class="form-item">
+        <label for="unit">单位:</label>
+        <input type="text" id="unit" placeholder="请输入单位">
+      </div>
+      <div class="form-item">
+        <label for="price">单价:</label>
+        <input type="number" id="price" placeholder="请输入单价" oninput="calculateAmount()">
+      </div>
+      <div class="form-item">
+        <label for="amount">金额:</label>
+        <input type="text" id="amount" readonly>
+      </div>
+      <div class="form-item">
+        <label for="inDate">入库日期<span class="error-message" id="inDateError">*</span>:</label>
+        <input type="date" id="inDate" onchange="checkDate()" required>
+      </div>
+    </div>
+
+    <!-- 第三行：入库人，入库类型，备注 -->
+    <div class="form-group form-row-3">
+      <div class="form-item">
+        <label for="inUser">入库人:</label>
+        <input type="text" id="inUser" placeholder="请输入入库人">
+      </div>
+      <div class="form-item">
+        <label for="inType">入库类型:</label>
+        <select id="inType">
+          <option value="采购入库">采购入库</option>
+          <option value="修旧入库">修旧入库</option>
+          <option value="项目入库">项目入库</option>
+          <option value="工具杂品">工具杂品</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label for="remark">备注:</label>
+        <textarea id="remark" placeholder="请输入备注"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" onclick="savePart()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 出库模态框 -->
+<div id="outboundModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeOutboundModal()">&times;</span>
+    <h2 class="page-title">备件出库</h2>
+
+    <div class="form-group form-row-1">
+      <div class="form-item">
+        <label for="outboundPartCode">物料编码:</label>
+        <input type="text" id="outboundPartCode" readonly>
+      </div>
+      <div class="form-item">
+        <label for="outboundPartName">物料名称:</label>
+        <input type="text" id="outboundPartName" readonly>
+      </div>
+      <div class="form-item">
+        <label for="currentQuantity">当前库存:</label>
+        <input type="number" id="currentQuantity" readonly>
+      </div>
+    </div>
+
+    <div class="form-group form-row-2">
+      <div class="form-item">
+        <label for="outboundPerson">出库人<span class="error-message">*</span>:</label>
+        <input type="text" id="outboundPerson" placeholder="请输入出库人" required>
+      </div>
+      <div class="form-item">
+        <label for="outboundDate">出库时间<span class="error-message">*</span>:</label>
+        <input type="date" id="outboundDate" required>
+      </div>
+      <div class="form-item">
+        <label for="outboundQuantity">出库数量<span class="error-message">*</span>:</label>
+        <input type="number" id="outboundQuantity" placeholder="请输入出库数量" min="1" required>
+      </div>
+    </div>
+
+    <div class="form-group form-row-3">
+      <div class="form-item">
+        <label for="machineUsed">使用机台:</label>
+        <input type="text" id="machineUsed" placeholder="请输入使用机台">
+      </div>
+      <div class="form-item">
+        <label for="outboundRemark">备注:</label>
+        <textarea id="outboundRemark" placeholder="请输入备注"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" onclick="confirmOutbound()">确认出库</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 从本地存储加载数据
+  let partsList = JSON.parse(localStorage.getItem('partsList')) || [];
+  let transactionList = JSON.parse(localStorage.getItem('transactionList')) || []; // 出入库记录
+  let editingIndex = null;
+  let outboundIndex = null; // 当前出库的备件索引
+  let filteredPartsList = []; // 用于存储筛选或搜索后的列表
+  let currentSearchTerm = ''; // 保存当前搜索词，用于高亮显示
+  let agePieChart = null; // 饼图实例
+  let outboundTrendChart = null; // 出库趋势图实例
+  let outboundTypeChart = null; // 出库类型图实例
+  let topOutboundChart = null; // 出库TOP备件图实例
+  let currentTypeFilter = ''; // 当前入库类型筛选条件
+  let sortDirection = 'desc'; // 排序方向：desc-降序（最新在前），asc-升序     
+  // 页面加载完成后渲染表格和图表
+  window.addEventListener('DOMContentLoaded', function() {
+    renderTable();
+    updateDashboard();
+    renderTransactionTable();
+    
+    // 设置默认出库日期为今天
+    document.getElementById('outboundDate').valueAsDate = new Date();
+  });
+
+  // 保存数据到本地存储
+  function saveToLocalStorage() {
+    localStorage.setItem('partsList', JSON.stringify(partsList));
+    localStorage.setItem('transactionList', JSON.stringify(transactionList));
+  }
+
+  function showPage(page) {
+    const pages = ['home', 'partManagement', 'dataAnalysis'];
+    pages.forEach(p => document.getElementById(p).style.display = 'none');
+    document.getElementById(page).style.display = 'block';
+    
+    // 如果切换到备件管理页面，刷新表格
+    if (page === 'partManagement') {
+      // 检查是否有筛选或搜索条件
+      if (hasActiveFilters()) {
+        // 先检查是否有搜索词
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        if (searchTerm) {
+          globalSearch(); // 保持搜索状态
+        } else {
+          applyFilters(); // 保持筛选状态
+        }
+      } else {
+        filteredPartsList = []; // 清空过滤列表
+        currentSearchTerm = '';
+        renderTable();
+      }
+    } 
+    // 如果切换到库存看板页面，更新看板数据
+    else if (page === 'dataAnalysis') {
+      // 保存当前入库类型筛选条件
+      currentTypeFilter = document.getElementById('dashboardTypeFilter').value;
+      updateDashboard();
+    }
+    // 如果切换到首页，刷新出入库记录
+    else if (page === 'home') {
+      renderTransactionTable();
+    }
+  }
+
+  // 更新库存看板数据
+  function updateDashboard() {
+    // 获取当前入库类型筛选条件
+    currentTypeFilter = document.getElementById('dashboardTypeFilter').value;
+    calculateAgeStats();
+    calculateTotalStats();
+    renderAnalysisTable();
+    // 新增：更新出库分析图表
+    calculateOutboundStats();
+    renderOutboundAnalysisTable();
+  }
+
+  // 计算库存账龄统计数据并绘制饼图
+  function calculateAgeStats() {
+    // 初始化各账龄段的金额统计
+    const ageStats = {
+      'twoMonths': { label: '两月以内', amount: 0, count: 0, color: '#4CAF50' },
+      'fiveMonths': { label: '五月以内', amount: 0, count: 0, color: '#2196F3' },
+      'oneYear': { label: '一年以内', amount: 0, count: 0, color: '#ff9800' },
+      'overOneYear': { label: '一年以上', amount: 0, count: 0, color: '#f44336' }
+    };
+
+    // 根据入库类型筛选数据
+    const filteredData = currentTypeFilter 
+      ? partsList.filter(part => part.inType === currentTypeFilter)
+      : partsList;
+
+    // 计算每个备件的账龄并累加到相应的统计项
+    filteredData.forEach(part => {
+      if (!part.inDate || !part.amount) return;
+      
+      const currentDate = new Date();
+      const inDateObj = new Date(part.inDate);
+      
+      // 计算月份差异
+      let monthDiff = (currentDate.getFullYear() - inDateObj.getFullYear()) * 12;
+      monthDiff -= inDateObj.getMonth();
+      monthDiff += currentDate.getMonth();
+      
+      // 将金额转换为数值（万元）
+      const amountValue = parseFloat(part.amount) / 10000;
+      
+      // 计数加1
+      let ageKey;
+      
+      // 根据账龄归类
+      if (monthDiff <= 2) {
+        ageKey = 'twoMonths';
+      } else if (monthDiff <= 5) {
+        ageKey = 'fiveMonths';
+      } else if (monthDiff <= 12) {
+        ageKey = 'oneYear';
+      } else {
+        ageKey = 'overOneYear';
+      }
+      
+      ageStats[ageKey].amount += amountValue;
+      ageStats[ageKey].count += 1;
+    });
+
+    // 准备饼图数据
+    const labels = [];
+    const data = [];
+    const colors = [];
+    const ageKeys = [];
+    const counts = [];
+    
+    Object.keys(ageStats).forEach(key => {
+      if (ageStats[key].amount > 0) {
+        labels.push(ageStats[key].label);
+        data.push(ageStats[key].amount.toFixed(2));
+        counts.push(ageStats[key].count);
+        colors.push(ageStats[key].color);
+        ageKeys.push(key);
+      }
+    });
+
+    // 计算总金额用于百分比计算
+    const totalAmount = data.reduce((sum, value) => sum + parseFloat(value), 0);
+
+    // 绘制或更新饼图
+    const ctx = document.getElementById('agePieChart').getContext('2d');
+    
+    // 如果图表已存在，先销毁
+    if (agePieChart) {
+      agePieChart.destroy();
+    }
+    
+    // 创建新图表
+    agePieChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: colors,
+          borderColor: '#fff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              font: {
+                size: 14
+              },
+              padding: 20
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const label = context.label || '';
+                const value = context.raw || 0;
+                const percentage = totalAmount > 0 ? ((value / totalAmount) * 100).toFixed(1) : 0;
+                return `${label}: ${value} 万元 (${percentage}%)`;
+              }
+            }
+          },
+          // 数据标签配置
+          datalabels: {
+            formatter: function(value, context) {
+              const percentage = totalAmount > 0 ? ((value / totalAmount) * 100).toFixed(1) : 0;
+              return `${value}万\n${percentage}%`;
+            },
+            color: '#fff',
+            font: {
+              weight: 'bold',
+              size: 12
+            },
+            padding: 10
+          }
+        },
+        // 添加点击事件
+        onClick: function(e, elements) {
+          if (elements && elements.length > 0) {
+            const index = elements[0].index;
+            const ageKey = ageKeys[index];
+            // 筛选并跳转到备件管理页面
+            filterByAgeAndSwitch(ageKey);
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+  }
+
+  // 计算出库统计数据并绘制相关图表
+  function calculateOutboundStats() {
+    // 筛选出所有出库记录
+    const outboundRecords = transactionList.filter(t => t.type === '出库');
+    
+    // 1. 出库趋势图数据处理
+    const periodType = document.getElementById('outboundPeriodFilter').value;
+    const periodData = {};
+    
+    // 按周期分组统计
+    outboundRecords.forEach(record => {
+      const date = new Date(record.date);
+      let periodKey;
+      
+      if (periodType === 'month') {
+        // 按月统计：YYYY-MM
+        periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      } else if (periodType === 'week') {
+        // 按周统计：YYYY-第W周
+        const week = getWeekNumber(date);
+        periodKey = `${date.getFullYear()}-第${week}周`;
+      } else {
+        // 按日统计：YYYY-MM-DD
+        periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      }
+      
+      if (!periodData[periodKey]) {
+        periodData[periodKey] = 0;
+      }
+      periodData[periodKey] += parseFloat(record.quantity);
+    });
+    
+    // 排序周期
+    const sortedPeriods = Object.keys(periodData).sort();
+    const periodLabels = sortedPeriods;
+    const periodValues = sortedPeriods.map(period => periodData[period]);
+    
+    // 绘制出库趋势图
+    const trendCtx = document.getElementById('outboundTrendChart').getContext('2d');
+    if (outboundTrendChart) {
+      outboundTrendChart.destroy();
+    }
+    outboundTrendChart = new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: periodLabels,
+        datasets: [{
+          label: '出库数量',
+          data: periodValues,
+          backgroundColor: 'rgba(33, 150, 243, 0.2)',
+          borderColor: 'rgba(33, 150, 243, 1)',
+          borderWidth: 2,
+          tension: 0.3,
+          fill: true,
+          pointBackgroundColor: 'rgba(33, 150, 243, 1)',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `出库数量: ${context.raw}`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: '出库数量'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: periodType === 'month' ? '月份' : periodType === 'week' ? '周' : '日期'
+            }
+          }
+        }
+      }
+    });
+    
+    // 2. 出库备件类型占比
+    const typeData = {};
+    const colors = [
+      '#4CAF50', '#2196F3', '#ff9800', '#f44336', '#9c27b0', 
+      '#e91e63', '#673ab7', '#3f51b5', '#009688', '#8bc34a'
+    ];
+    
+    outboundRecords.forEach(record => {
+      // 查找该备件的入库类型
+      const part = partsList.find(p => p.partCode === record.partCode);
+      const type = part ? part.inType : '未知类型';
+      
+      if (!typeData[type]) {
+        typeData[type] = 0;
+      }
+      typeData[type] += parseFloat(record.quantity);
+    });
+    
+    const typeLabels = Object.keys(typeData);
+    const typeValues = typeLabels.map(type => typeData[type]);
+    const typeColors = typeLabels.map((_, index) => colors[index % colors.length]);
+    
+    // 绘制出库类型占比图
+    const typeCtx = document.getElementById('outboundTypeChart').getContext('2d');
+    if (outboundTypeChart) {
+      outboundTypeChart.destroy();
+    }
+    outboundTypeChart = new Chart(typeCtx, {
+      type: 'doughnut',
+      data: {
+        labels: typeLabels,
+        datasets: [{
+          data: typeValues,
+          backgroundColor: typeColors,
+          borderColor: '#fff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
+                return `${context.label}: ${context.raw} (${percentage}%)`;
+              }
+            }
+          },
+          datalabels: {
+            formatter: function(value, context) {
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+              return `${percentage}%`;
+            },
+            color: '#fff',
+            font: {
+              weight: 'bold'
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+    
+    // 3. 出库量TOP 5备件
+    const partData = {};
+    const partCount = {}; // 记录出库次数
+    
+    outboundRecords.forEach(record => {
+      const key = `${record.partCode}-${record.partName}`;
+      
+      if (!partData[key]) {
+        partData[key] = {
+          code: record.partCode,
+          name: record.partName,
+          quantity: 0,
+          amount: 0
+        };
+        partCount[key] = 0;
+      }
+      
+      partData[key].quantity += parseFloat(record.quantity);
+      partCount[key]++;
+      
+      // 计算出库金额
+      const part = partsList.find(p => p.partCode === record.partCode);
+      if (part) {
+        partData[key].amount += parseFloat(record.quantity) * parseFloat(part.price);
+      }
+    });
+    
+    // 转换为数组并排序
+    const partArray = Object.values(partData);
+    partArray.sort((a, b) => b.quantity - a.quantity);
+    
+    // 取前5名
+    const topParts = partArray.slice(0, 5);
+    const topLabels = topParts.map(p => `${p.name}(${p.code})`);
+    const topValues = topParts.map(p => p.quantity);
+    
+    // 绘制出库TOP备件图
+    const topCtx = document.getElementById('topOutboundChart').getContext('2d');
+    if (topOutboundChart) {
+      topOutboundChart.destroy();
+    }
+    topOutboundChart = new Chart(topCtx, {
+      type: 'bar',
+      data: {
+        labels: topLabels,
+        datasets: [{
+          label: '出库数量',
+          data: topValues,
+          backgroundColor: 'rgba(231, 76, 60, 0.7)',
+          borderColor: 'rgba(231, 76, 60, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const part = topParts[context.dataIndex];
+                return [
+                  `出库数量: ${part.quantity}`,
+                  `出库金额: ${part.amount.toFixed(2)}元`
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: '出库数量'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: '备件名称(编码)'
+            }
+          }
+        }
+      }
+    });
+    
+    // 更新出库统计数据
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const monthlyOutbound = outboundRecords
+      .filter(r => {
+        const date = new Date(r.date);
+        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+      })
+      .reduce((sum, r) => sum + parseFloat(r.quantity), 0);
+    
+    // 计算总出库金额
+    let totalOutboundAmount = 0;
+    outboundRecords.forEach(record => {
+      const part = partsList.find(p => p.partCode === record.partCode);
+      if (part) {
+        totalOutboundAmount += parseFloat(record.quantity) * parseFloat(part.price);
+      }
+    });
+    
+    document.getElementById('monthlyOutbound').textContent = monthlyOutbound;
+    document.getElementById('totalOutboundAmount').textContent = (totalOutboundAmount / 10000).toFixed(2) + ' 万元';
+  }
+
+  // 获取日期所在的周数
+  function getWeekNumber(date) {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+    const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  }
+
+  // 渲染库存分析统计表格
+  function renderAnalysisTable() {
+    const tableBody = document.querySelector('#ageAnalysisTable tbody');
+    tableBody.innerHTML = '';
+
+    // 初始化各账龄段的金额统计
+    const ageStats = {
+      'twoMonths': { label: '两月以内', amount: 0, count: 0 },
+      'fiveMonths': { label: '五月以内', amount: 0, count: 0 },
+      'oneYear': { label: '一年以内', amount: 0, count: 0 },
+      'overOneYear': { label: '一年以上', amount: 0, count: 0 }
+    };
+
+    // 根据入库类型筛选数据
+    const filteredData = currentTypeFilter 
+      ? partsList.filter(part => part.inType === currentTypeFilter)
+      : partsList;
+
+    // 计算每个备件的账龄并累加到相应的统计项
+    filteredData.forEach(part => {
+      if (!part.inDate || !part.amount) return;
+      
+      const currentDate = new Date();
+      const inDateObj = new Date(part.inDate);
+      
+      // 计算月份差异
+      let monthDiff = (currentDate.getFullYear() - inDateObj.getFullYear()) * 12;
+      monthDiff -= inDateObj.getMonth();
+      monthDiff += currentDate.getMonth();
+      
+      // 将金额转换为数值（万元）
+      const amountValue = parseFloat(part.amount) / 10000;
+      
+      // 根据账龄归类
+      if (monthDiff <= 2) {
+        ageStats.twoMonths.amount += amountValue;
+        ageStats.twoMonths.count += 1;
+      } else if (monthDiff <= 5) {
+        ageStats.fiveMonths.amount += amountValue;
+        ageStats.fiveMonths.count += 1;
+      } else if (monthDiff <= 12) {
+        ageStats.oneYear.amount += amountValue;
+        ageStats.oneYear.count += 1;
+      } else {
+        ageStats.overOneYear.amount += amountValue;
+        ageStats.overOneYear.count += 1;
+      }
+    });
+
+    // 计算总金额用于百分比计算
+    const totalAmount = Object.values(ageStats).reduce((sum, stat) => sum + stat.amount, 0);
+
+    // 填充表格
+    Object.values(ageStats).forEach(stat => {
+      const row = document.createElement('tr');
+      const percentage = totalAmount > 0 ? ((stat.amount / totalAmount) * 100).toFixed(1) : 0;
+      
+      row.innerHTML = `
+        <td>${stat.label}</td>
+        <td>${stat.count}</td>
+        <td>${stat.amount.toFixed(2)}</td>
+        <td>${percentage}</td>
+      `;
+      
+      tableBody.appendChild(row);
+    });
+
+    // 添加总计行
+    const totalRow = document.createElement('tr');
+    totalRow.style.fontWeight = 'bold';
+    totalRow.style.backgroundColor = 'var(--primary-light)';
+    
+    const totalCount = Object.values(ageStats).reduce((sum, stat) => sum + stat.count, 0);
+    
+    totalRow.innerHTML = `
+      <td>总计</td>
+      <td>${totalCount}</td>
+      <td>${totalAmount.toFixed(2)}</td>
+      <td>100.0</td>
+    `;
+    
+    tableBody.appendChild(totalRow);
+  }
+
+  // 渲染出库分析统计表格
+  function renderOutboundAnalysisTable() {
+    const tableBody = document.querySelector('#outboundAnalysisTable tbody');
+    tableBody.innerHTML = '';
+
+    // 筛选出所有出库记录
+    const outboundRecords = transactionList.filter(t => t.type === '出库');
+    
+    // 按备件分组统计
+    const partData = {};
+    const partCount = {}; // 记录出库次数
+    
+    outboundRecords.forEach(record => {
+      const key = record.partCode;
+      
+      if (!partData[key]) {
+        partData[key] = {
+          code: record.partCode,
+          name: record.partName,
+          quantity: 0,
+          amount: 0
+        };
+        partCount[key] = 0;
+      }
+      
+      partData[key].quantity += parseFloat(record.quantity);
+      partCount[key]++;
+      
+      // 计算出库金额
+      const part = partsList.find(p => p.partCode === record.partCode);
+      if (part) {
+        partData[key].amount += parseFloat(record.quantity) * parseFloat(part.price);
+      }
+    });
+    
+    // 转换为数组并排序（按出库数量降序）
+    const partArray = Object.values(partData);
+    partArray.sort((a, b) => b.quantity - a.quantity);
+    
+    // 填充表格
+    if (partArray.length === 0) {
+      const row = document.createElement('tr');
+      row.innerHTML = '<td colspan="5" style="text-align: center; padding: 20px;">暂无出库记录</td>';
+      tableBody.appendChild(row);
+    } else {
+      partArray.forEach(part => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${part.code}</td>
+          <td>${part.name}</td>
+          <td>${part.quantity}</td>
+          <td>${part.amount.toFixed(2)}</td>
+          <td>${partCount[part.code]}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+  }
+
+  // 计算总金额和总数量统计
+  function calculateTotalStats() {
+    // 根据入库类型筛选数据
+    const filteredData = currentTypeFilter 
+      ? partsList.filter(part => part.inType === currentTypeFilter)
+      : partsList;
+      
+    // 计算总金额（万元）
+    const totalAmount = filteredData.reduce((sum, part) => {
+      return sum + (parseFloat(part.amount) || 0);
+    }, 0) / 10000;
+    
+    // 计算备件总数
+    const totalItems = filteredData.length;
+    
+    // 更新统计显示
+    document.getElementById('totalAmount').textContent = totalAmount.toFixed(2) + ' 万元';
+    document.getElementById('totalItems').textContent = totalItems + ' 项';
+  }
+
+  // 根据账龄和入库类型筛选并切换到备件管理页面
+  function filterByAgeAndSwitch(ageKey) {
+    // 重置之前的筛选条件
+    resetFilters();
+    
+    // 设置账龄筛选条件
+    document.getElementById('filterAge').value = ageKey;
+    
+    // 如果有入库类型筛选条件，也一并应用
+    if (currentTypeFilter) {
+      document.getElementById('filterType').value = currentTypeFilter;
+    }
+    
+    // 切换到备件管理页面
+    showPage('partManagement');
+    
+    // 应用筛选
+    applyFilters();
+  }
+
+  // 检查是否有激活的筛选条件或搜索词
+  function hasActiveFilters() {
+    const type = document.getElementById('filterType').value;
+    const age = document.getElementById('filterAge').value;
+    const dateFrom = document.getElementById('filterDateFrom').value;
+    const dateTo = document.getElementById('filterDateTo').value;
+    const searchTerm = document.getElementById('searchInput').value.trim();
+    
+    return type || age || dateFrom || dateTo || searchTerm;
+  }
+
+  // 计算金额
+  function calculateAmount() {
+    const quantity = document.getElementById('quantity').value;
+    const price = document.getElementById('price').value;
+    const amount = quantity * price;
+    document.getElementById('amount').value = amount.toFixed(2);
+  }
+
+  // 检查入库日期
+  function checkDate() {
+    const inDate = document.getElementById('inDate').value;
+    const currentDate = new Date().toISOString().split('T')[0];
+    if (inDate > currentDate) {
+      alert("入库日期不能大于当前日期");
+      document.getElementById('inDate').value = currentDate;
+    }
+  }
+
+  // 添加/保存备件
+  function savePart() {
+    const partCode = document.getElementById('partCode').value;
+    const partName = document.getElementById('partName').value;
+    const inDate = document.getElementById('inDate').value;
+    const quantity = document.getElementById('quantity').value;
+    const price = document.getElementById('price').value;
+    const amount = document.getElementById('amount').value;
+    const inUser = document.getElementById('inUser').value;
+    const remark = document.getElementById('remark').value;
+
+    // 验证必填项
+    if (!partCode || !partName || !inDate) {
+      alert("物料编码、物料名称、入库日期为必填项");
+      return;
+    }
+
+    const part = {
+      partCode,
+      partName,
+      batchNo: document.getElementById('batchNo').value || '',
+      quantity: quantity || 0,
+      unit: document.getElementById('unit').value || '',
+      price: price || 0,
+      amount: amount || 0,
+      inDate,
+      age: calculateAge(inDate),
+      inUser: inUser || '',
+      inType: document.getElementById('inType').value,
+      remark: remark || ''
+    };
+
+    // 记录入库交易
+    const isNew = editingIndex === null;
+    if (isNew) {
+      partsList.push(part);
+      // 添加入库记录
+      transactionList.push({
+        partCode,
+        partName,
+        type: '入库',
+        quantity: part.quantity,
+        person: part.inUser,
+        date: part.inDate,
+        remark: `入库类型: ${part.inType}`
+      });
+    } else {
+      // 更新备件
+      const oldPart = partsList[editingIndex];
+      const quantityDiff = parseFloat(part.quantity) - parseFloat(oldPart.quantity);
+      
+      // 如果数量有变化，记录入库调整
+      if (quantityDiff > 0) {
+        transactionList.push({
+          partCode,
+          partName,
+          type: '入库调整',
+          quantity: quantityDiff,
+          person: inUser || '系统',
+          date: new Date().toISOString().split('T')[0],
+          remark: '编辑调整'
+        });
+      }
+      
+      partsList[editingIndex] = part;
+      editingIndex = null;
+    }
+
+    // 保存到本地存储
+    saveToLocalStorage();
+
+    // 保持当前的筛选或搜索状态
+    if (hasActiveFilters()) {
+      const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (searchTerm) {
+        globalSearch();
+      } else {
+        applyFilters();
+      }
+    } else {
+      filteredPartsList = [...partsList];
+    }
+
+    renderTable();
+    updateDashboard(); // 更新库存看板数据
+    renderTransactionTable(); // 更新出入库记录
+    clearForm();
+    closeModal();
+  }
+
+  // 渲染备件表格（支持搜索词高亮）
+  function renderTable() {
+    const tableBody = document.querySelector('#partsTable tbody');
+    tableBody.innerHTML = '';
+
+    // 确定要显示的数据
+    const displayList = filteredPartsList.length > 0 ? filteredPartsList : partsList;
+
+    if (displayList.length === 0) {
+      const row = document.createElement('tr');
+      row.innerHTML = '<td colspan="13" style="text-align: center; padding: 20px;">暂无备件数据</td>';
+      tableBody.appendChild(row);
+      return;
+    }
+
+    displayList.forEach((part, index) => {
+      const row = document.createElement('tr');
+      
+      // 计算实际索引（如果使用了筛选列表）
+      const actualIndex = filteredPartsList.length > 0 
+        ? partsList.findIndex(p => p.partCode === part.partCode && p.batchNo === part.batchNo)
+        : index;
+
+      // 格式化金额显示
+      const formattedAmount = parseFloat(part.amount).toFixed(2);
+      
+      // 构建表格行内容
+      row.innerHTML = `
+        <td>${highlightSearchTerm(part.partCode)}</td>
+        <td>${highlightSearchTerm(part.partName)}</td>
+        <td>${highlightSearchTerm(part.batchNo)}</td>
+        <td>${part.quantity}</td>
+        <td>${part.unit}</td>
+        <td>${parseFloat(part.price).toFixed(2)}</td>
+        <td>${formattedAmount}</td>
+        <td>${part.inDate}</td>
+        <td>${part.age}</td>
+        <td>${highlightSearchTerm(part.inUser)}</td>
+        <td>${part.inType}</td>
+        <td>${highlightSearchTerm(part.remark)}</td>
+        <td>
+          <button class="btn-edit" onclick="editPart(${actualIndex})">
+            <i class="fas fa-edit"></i> 编辑
+          </button>
+          <button class="btn-export" onclick="openOutboundModal(${actualIndex})">
+            <i class="fas fa-sign-out-alt"></i> 出库
+          </button>
+          <button class="btn-delete" onclick="deletePart(${actualIndex})">
+            <i class="fas fa-trash"></i> 删除
+          </button>
+        </td>
+      `;
+      
+      tableBody.appendChild(row);
+    });
+  }
+
+  // 渲染出入库记录表
+  function renderTransactionTable() {
+    const tableBody = document.querySelector('#transactionTable tbody');
+    tableBody.innerHTML = '';
+
+    if (transactionList.length === 0) {
+      const row = document.createElement('tr');
+      row.innerHTML = '<td colspan="8" style="text-align: center; padding: 20px;">暂无出入库记录</td>';
+      tableBody.appendChild(row);
+      return;
+    }
+
+    // 按时间倒序排列，最新的记录在前面
+    const sortedTransactions = [...transactionList].sort((a, b) => 
+      new Date(b.date) - new Date(a.date)
+    );
+
+    sortedTransactions.forEach((transaction, index) => {
+      const row = document.createElement('tr');
+      // 根据操作类型设置不同的颜色
+      const typeClass = transaction.type === '入库' || transaction.type === '入库调整' || transaction.type === '导入入库'
+        ? 'style="color: green;"' 
+        : 'style="color: #e74c3c;"';
+      
+      row.innerHTML = `
+        <td>${transaction.partCode}</td>
+        <td>${transaction.partName}</td>
+        <td ${typeClass}>${transaction.type}</td>
+        <td>${transaction.quantity}</td>
+        <td>${transaction.person}</td>
+        <td>${transaction.date}</td>
+        <td>${transaction.remark || '-'}</td>
+        <td>
+          <button class="btn-delete" onclick="deleteTransaction(${index})">
+            <i class="fas fa-trash"></i> 删除
+          </button>
+        </td>
+      `;
+      
+      tableBody.appendChild(row);
+    });
+  }
+
+  // 高亮搜索词
+  function highlightSearchTerm(text) {
+    if (!currentSearchTerm || !text) return text;
+    
+    const lowerText = text.toString().toLowerCase();
+    const lowerTerm = currentSearchTerm.toLowerCase();
+    const index = lowerText.indexOf(lowerTerm);
+    
+    if (index === -1) return text;
+    
+    const before = text.substring(0, index);
+    const match = text.substring(index, index + currentSearchTerm.length);
+    const after = text.substring(index + currentSearchTerm.length);
+    
+    return `${before}<span class="highlight">${match}</span>${after}`;
+  }
+
+  // 计算库存账龄
+  function calculateAge(inDate) {
+    const currentDate = new Date();
+    const inDateObj = new Date(inDate);
+    
+    // 计算月份差异
+    let monthDiff = (currentDate.getFullYear() - inDateObj.getFullYear()) * 12;
+    monthDiff -= inDateObj.getMonth();
+    monthDiff += currentDate.getMonth();
+    
+    if (monthDiff <= 2) {
+      return '两月以内';
+    } else if (monthDiff <= 5) {
+      return '五月以内';
+    } else if (monthDiff <= 12) {
+      return '一年以内';
+    } else {
+      return '一年以上';
+    }
+  }
+
+  // 打开添加/编辑模态框
+  function openModal(index = null) {
+    clearForm();
+    editingIndex = index;
+    
+    if (index !== null) {
+      const part = partsList[index];
+      document.getElementById('partCode').value = part.partCode;
+      document.getElementById('partName').value = part.partName;
+      document.getElementById('batchNo').value = part.batchNo;
+      document.getElementById('quantity').value = part.quantity;
+      document.getElementById('unit').value = part.unit;
+      document.getElementById('price').value = part.price;
+      document.getElementById('amount').value = part.amount;
+      document.getElementById('inDate').value = part.inDate;
+      document.getElementById('inUser').value = part.inUser;
+      document.getElementById('inType').value = part.inType;
+      document.getElementById('remark').value = part.remark;
+    } else {
+      // 设置默认日期为今天
+      document.getElementById('inDate').valueAsDate = new Date();
+    }
+    
+    // 显示模态框
+    const modal = document.getElementById('partModal');
+    modal.style.display = 'block';
+    setTimeout(() => modal.classList.add('show'), 10);
+  }
+
+  // 关闭模态框
+  function closeModal() {
+    const modal = document.getElementById('partModal');
+    modal.classList.remove('show');
+    setTimeout(() => modal.style.display = 'none', 300);
+  }
+
+  // 打开出库模态框
+  function openOutboundModal(index) {
+    outboundIndex = index;
+    const part = partsList[index];
+    
+    // 填充出库表单
+    document.getElementById('outboundPartCode').value = part.partCode;
+    document.getElementById('outboundPartName').value = part.partName;
+    document.getElementById('currentQuantity').value = part.quantity;
+    document.getElementById('outboundPerson').value = '';
+    document.getElementById('outboundQuantity').value = '';
+    document.getElementById('machineUsed').value = '';
+    document.getElementById('outboundRemark').value = '';
+    document.getElementById('outboundDate').valueAsDate = new Date();
+    
+    // 显示出库模态框
+    const modal = document.getElementById('outboundModal');
+    modal.style.display = 'block';
+    setTimeout(() => modal.classList.add('show'), 10);
+  }
+
+  // 关闭出库模态框
+  function closeOutboundModal() {
+    const modal = document.getElementById('outboundModal');
+    modal.classList.remove('show');
+    setTimeout(() => modal.style.display = 'none', 300);
+  }
+
+  // 确认出库
+  function confirmOutbound() {
+    if (outboundIndex === null) return;
+    
+    const part = partsList[outboundIndex];
+    const outboundPerson = document.getElementById('outboundPerson').value;
+    const outboundDate = document.getElementById('outboundDate').value;
+    const outboundQuantity = parseFloat(document.getElementById('outboundQuantity').value);
+    const machineUsed = document.getElementById('machineUsed').value;
+    const outboundRemark = document.getElementById('outboundRemark').value;
+    
+    // 验证出库信息
+    if (!outboundPerson || !outboundDate || !outboundQuantity || outboundQuantity <= 0) {
+      alert('请填写完整的出库信息，出库数量必须大于0');
+      return;
+    }
+    
+    // 检查库存是否充足
+    if (outboundQuantity > parseFloat(part.quantity)) {
+      alert('出库数量不能大于当前库存量');
+      return;
+    }
+    
+    // 更新库存量（确保数据同步更新）
+    const newQuantity = parseFloat(part.quantity) - outboundQuantity;
+    const newAmount = newQuantity * parseFloat(part.price);
+    
+    partsList[outboundIndex] = {
+      ...part,
+      quantity: newQuantity,
+      amount: newAmount.toFixed(2),
+      age: calculateAge(part.inDate) // 重新计算账龄
+    };
+    
+    // 记录出库交易
+    transactionList.push({
+      partCode: part.partCode,
+      partName: part.partName,
+      type: '出库',
+      quantity: outboundQuantity,
+      person: outboundPerson,
+      date: outboundDate,
+      remark: `使用机台: ${machineUsed || '未填写'}; ${outboundRemark || ''}`
+    });
+    
+    // 保存到本地存储
+    saveToLocalStorage();
+    
+    // 刷新表格（确保数据同步更新）
+    if (hasActiveFilters()) {
+      const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (searchTerm) {
+        globalSearch();
+      } else {
+        applyFilters();
+      }
+    } else {
+      filteredPartsList = [];
+      renderTable();
+    }
+    
+    updateDashboard(); // 更新库存看板和出库分析数据
+    renderTransactionTable(); // 更新出入库记录
+    
+    // 关闭模态框
+    closeOutboundModal();
+    
+    alert('出库操作成功，备件数据已同步更新');
+  }
+
+  // 编辑备件
+  function editPart(index) {
+    openModal(index);
+  }
+
+  // 删除备件
+  function deletePart(index) {
+    if (confirm('确定要删除这条备件记录吗？')) {
+      partsList.splice(index, 1);
+      saveToLocalStorage();
+      
+      if (hasActiveFilters()) {
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        if (searchTerm) {
+          globalSearch();
+        } else {
+          applyFilters();
+        }
+      } else {
+        filteredPartsList = [];
+        renderTable();
+      }
+      
+      updateDashboard();
+    }
+  }
+
+  // 删除出入库记录
+  function deleteTransaction(index) {
+    if (confirm('确定要删除这条出入库记录吗？此操作不会影响备件库存数据。')) {
+      transactionList.splice(index, 1);
+      saveToLocalStorage();
+      renderTransactionTable();
+      updateDashboard(); // 更新看板数据
+    }
+  }
+
+  // 清空所有出入库记录
+  function clearAllTransactions() {
+    if (transactionList.length === 0) {
+      alert('当前没有出入库记录可清空');
+      return;
+    }
+    
+    if (confirm('确定要清空所有出入库记录吗？此操作不会影响备件库存数据，但所有记录将无法恢复！')) {
+      transactionList = [];
+      saveToLocalStorage();
+      renderTransactionTable();
+      updateDashboard(); // 更新看板数据
+      alert('所有出入库记录已清空');
+    }
+  }
+
+  // 导出出入库记录到Excel
+  function exportTransactionsToExcel() {
+    if (transactionList.length === 0) {
+      alert('当前没有出入库记录可导出');
+      return;
+    }
+    
+    const wb = XLSX.utils.book_new();
+    
+    // 准备导出数据，复制一份避免修改原始数据
+    const exportData = [...transactionList];
+    
+    // 转换日期格式为更易读的形式
+    exportData.forEach(record => {
+      record.date = new Date(record.date).toLocaleDateString();
+    });
+    
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    XLSX.utils.book_append_sheet(wb, ws, "出入库记录");
+    
+    // 导出文件
+    XLSX.writeFile(wb, "出入库记录_" + new Date().toLocaleDateString() + ".xlsx");
+  }
+
+  // 清空表单
+  function clearForm() {
+    document.getElementById('partCode').value = '';
+    document.getElementById('partName').value = '';
+    document.getElementById('batchNo').value = '';
+    document.getElementById('quantity').value = '';
+    document.getElementById('unit').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('amount').value = '';
+    document.getElementById('inDate').value = '';
+    document.getElementById('inUser').value = '';
+    document.getElementById('inType').value = '采购入库';
+    document.getElementById('remark').value = '';
+  }
+
+  // 全局搜索
+  function globalSearch() {
+    const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+    currentSearchTerm = searchTerm;
+    
+    if (!searchTerm) {
+      filteredPartsList = [];
+      renderTable();
+      document.getElementById('filterSummary').classList.remove('show');
+      return;
+    }
+    
+    filteredPartsList = partsList.filter(part => {
+      // 搜索所有字段
+      return Object.values(part).some(value => 
+        value.toString().toLowerCase().includes(searchTerm)
+      );
+    });
+    
+    renderTable();
+    
+    // 显示搜索结果摘要
+    const summary = document.getElementById('filterSummary');
+    summary.textContent = `搜索结果: 共找到 ${filteredPartsList.length} 条匹配记录`;
+    summary.classList.add('show');
+  }
+
+  // 应用筛选条件
+  function applyFilters() {
+    const type = document.getElementById('filterType').value;
+    const age = document.getElementById('filterAge').value;
+    const dateFrom = document.getElementById('filterDateFrom').value;
+    const dateTo = document.getElementById('filterDateTo').value;
+    
+    filteredPartsList = partsList.filter(part => {
+      // 类型筛选
+      if (type && part.inType !== type) return false;
+      
+      // 账龄筛选
+      if (age) {
+        const currentDate = new Date();
+        const inDateObj = new Date(part.inDate);
+        
+        let monthDiff = (currentDate.getFullYear() - inDateObj.getFullYear()) * 12;
+        monthDiff -= inDateObj.getMonth();
+        monthDiff += currentDate.getMonth();
+        
+        if (age === 'twoMonths' && monthDiff > 2) return false;
+        if (age === 'fiveMonths' && (monthDiff <= 2 || monthDiff > 5)) return false;
+        if (age === 'oneYear' && (monthDiff <= 5 || monthDiff > 12)) return false;
+        if (age === 'overOneYear' && monthDiff <= 12) return false;
+      }
+      
+      // 日期范围筛选
+      if (dateFrom && new Date(part.inDate) < new Date(dateFrom)) return false;
+      if (dateTo && new Date(part.inDate) > new Date(dateTo)) return false;
+      
+      return true;
+    });
+    
+    renderTable();
+    
+    // 显示筛选结果摘要
+    const summary = document.getElementById('filterSummary');
+    summary.textContent = `筛选结果: 共找到 ${filteredPartsList.length} 条记录`;
+    summary.classList.add('show');
+  }
+
+  // 重置筛选条件
+  function resetFilters() {
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterAge').value = '';
+    document.getElementById('filterDateFrom').value = '';
+    document.getElementById('filterDateTo').value = '';
+    document.getElementById('searchInput').value = '';
+    
+    filteredPartsList = [];
+    currentSearchTerm = '';
+    renderTable();
+    
+    document.getElementById('filterSummary').classList.remove('show');
+  }
+
+  // 导出到Excel
+  function exportToExcel() {
+    const wb = XLSX.utils.book_new();
+    
+    // 确定要导出的数据
+    const exportData = filteredPartsList.length > 0 ? filteredPartsList : partsList;
+    
+    // 准备导出数据（排除age字段）
+    const exportParts = exportData.map(part => {
+      const { age, ...rest } = part;
+      return rest;
+    });
+    
+    const ws = XLSX.utils.json_to_sheet(exportParts);
+    XLSX.utils.book_append_sheet(wb, ws, "备件列表");
+    
+    // 导出文件
+    XLSX.writeFile(wb, "备件管理列表_" + new Date().toLocaleDateString() + ".xlsx");
+  }
+
+  // 从Excel导入
+  function importFromExcel(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        
+        // 转换为JSON
+        const importedData = XLSX.utils.sheet_to_json(ws);
+        
+        if (importedData.length === 0) {
+          alert('导入的Excel文件中没有数据');
+          return;
+        }
+        
+        // 验证表头
+        const requiredFields = ['物料编码', '物料名称', '入库日期'];
+        const firstRow = importedData[0];
+        const hasRequiredFields = requiredFields.every(field => 
+          Object.keys(firstRow).some(key => key.includes(field))
+        );
+        
+        if (!hasRequiredFields) {
+          alert('导入的Excel文件必须包含以下表头：物料编码、物料名称、入库日期');
+          return;
+        }
+        
+        // 处理导入的数据
+        importedData.forEach(item => {
+          // 映射字段（考虑可能的表头名称差异）
+          const partCodeKey = Object.keys(item).find(key => key.includes('物料编码'));
+          const partNameKey = Object.keys(item).find(key => key.includes('物料名称'));
+          const batchNoKey = Object.keys(item).find(key => key.includes('批次'));
+          const quantityKey = Object.keys(item).find(key => key.includes('现存量'));
+          const unitKey = Object.keys(item).find(key => key.includes('单位'));
+          const priceKey = Object.keys(item).find(key => key.includes('单价'));
+          const inDateKey = Object.keys(item).find(key => key.includes('入库日期'));
+          const inUserKey = Object.keys(item).find(key => key.includes('入库人'));
+          const inTypeKey = Object.keys(item).find(key => key.includes('入库类型'));
+          const remarkKey = Object.keys(item).find(key => key.includes('备注'));
+          
+          // 格式化日期
+          let formattedDate = item[inDateKey];
+          if (typeof formattedDate === 'number') {
+            // 处理Excel日期格式
+            formattedDate = XLSX.SSF.format('yyyy-mm-dd', formattedDate);
+          }
+          
+          // 计算金额
+          const quantity = parseFloat(item[quantityKey]) || 0;
+          const price = parseFloat(item[priceKey]) || 0;
+          const amount = (quantity * price).toFixed(2);
+          
+          // 创建备件对象
+          const part = {
+            partCode: item[partCodeKey] || '',
+            partName: item[partNameKey] || '',
+            batchNo: item[batchNoKey] || '',
+            quantity: quantity,
+            unit: item[unitKey] || '',
+            price: price,
+            amount: amount,
+            inDate: formattedDate || new Date().toISOString().split('T')[0],
+            age: calculateAge(formattedDate || new Date().toISOString().split('T')[0]),
+            inUser: item[inUserKey] || '',
+            inType: item[inTypeKey] || '采购入库',
+            remark: item[remarkKey] || ''
+          };
+          
+          // 检查是否已存在相同物料编码和批次的记录
+          const existingIndex = partsList.findIndex(
+            p => p.partCode === part.partCode && p.batchNo === part.batchNo
+          );
+          
+          if (existingIndex >= 0) {
+            // 更新现有记录
+            const oldQuantity = partsList[existingIndex].quantity;
+            const quantityDiff = part.quantity - oldQuantity;
+            
+            // 如果数量增加，记录入库调整
+            if (quantityDiff > 0) {
+              transactionList.push({
+                partCode: part.partCode,
+                partName: part.partName,
+                type: '导入入库',
+                quantity: quantityDiff,
+                person: part.inUser || '系统',
+                date: new Date().toISOString().split('T')[0],
+                remark: 'Excel导入更新'
+              });
+            }
+            
+            partsList[existingIndex] = part;
+          } else {
+            // 添加新记录
+            partsList.push(part);
+            
+            // 记录入库
+            if (part.quantity > 0) {
+              transactionList.push({
+                partCode: part.partCode,
+                partName: part.partName,
+                type: '导入入库',
+                quantity: part.quantity,
+                person: part.inUser || '系统',
+                date: part.inDate,
+                remark: 'Excel导入新增'
+              });
+            }
+          }
+        });
+        
+        // 保存数据
+        saveToLocalStorage();
+        
+        // 刷新表格
+        if (hasActiveFilters()) {
+          const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+          if (searchTerm) {
+            globalSearch();
+          } else {
+            applyFilters();
+          }
+        } else {
+          filteredPartsPartsList = [];
+          renderTable();
+        }
+        
+        updateDashboard();
+        renderTransactionTable();
+        
+        alert(`成功导入 ${importedData.length} 条数据`);
+      } catch (error) {
+        console.error('导入失败', error);
+        alert('导入失败，请检查文件格式是否正确');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    
+    // 重置文件输入，允许重复选择同一个文件
+    document.getElementById('fileInput').value = '';
+  }
+
+  // 点击模态框外部关闭
+  window.onclick = function(event) {
+    const partModal = document.getElementById('partModal');
+    const outboundModal = document.getElementById('outboundModal');
+    
+    if (event.target === partModal) {
+      closeModal();
+    }
+    
+    if (event.target === outboundModal) {
+      closeOutboundModal();
+    }
+  }
+
+  // 按Enter键触发搜索
+  document.getElementById('searchInput').addEventListener('keyup', function(event) {
+    if (event.key === 'Enter') {
+      globalSearch();
+    }
+  });
+</script>
+</body>
+</html>
